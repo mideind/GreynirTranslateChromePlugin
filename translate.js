@@ -1,6 +1,8 @@
 "use strict";
 
-let translation_marker = "translated"
+const ELEMENT_NODE = 1
+const TEXT_NODE = 3
+const DOCUMENT_NODE = 9
 
 function isExcluded(elm) {
     if (elm.tagName == "STYLE") {
@@ -24,9 +26,9 @@ function isExcluded(elm) {
     return false
 }
 
-function get_text_elements(elm, attribute_black_list = translation_marker) {
+function get_text_elements(elm) {
     let text_elements = []
-    if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
+    if (elm.nodeType == ELEMENT_NODE || elm.nodeType == DOCUMENT_NODE) {
 
         // exclude elements with invisible text nodes
         if (isExcluded(elm)) {
@@ -40,19 +42,16 @@ function get_text_elements(elm, attribute_black_list = translation_marker) {
 
     }
 
-    if (elm.nodeType == Node.TEXT_NODE) {
+    if (elm.nodeType == TEXT_NODE) {
 
         // exclude text node consisting of only spaces
         if (elm.nodeValue.trim() == "") {
             return text_elements
         }
 
-        // The elm.nodeValue is visible, but might already be translated.
-        if (elm.hasAttribute(attribute_black_list) && elm.getAttribute(attribute_black_list) === "true") {
-            return text_elements
-        } else {
-            text_elements.push(elm)
-        }
+        // The elm.nodeValue is visible
+        // TODO: Check if it has been translated.
+        text_elements.push(elm)
     }
     return text_elements
 }
@@ -71,9 +70,9 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
     return data["translations"].map(translation => translation["translatedText"])
 }
 
-function apply_translation(translation, element, class_mark_translated = translation_marker) {
+function apply_translation(translation, element) {
     element.nodeValue = translation
-    element.setAttribute("translated", "true")
+    // TODO: Mark as translated.
 }
 
 
@@ -83,7 +82,7 @@ async function translate_elements(elms, batch_size = 6, max_batches = 2) {
         let batch = elms.splice(0, batch_size)
         try {
             let translated = await translate(batch.map(elm => elm.nodeValue))
-            translated.forEach((translation, idx) => apply_translation(translation = translation, batch[idx]))
+            translated.forEach((translation, idx) => apply_translation(translation, batch[idx]))
         } catch (e) {
             console.error(e)
         }
@@ -91,6 +90,7 @@ async function translate_elements(elms, batch_size = 6, max_batches = 2) {
     }
 }
 
+// The max_batches is set for prototyping
 let max_batches = 2
 let batch_size = 6
 let text_elements = get_text_elements(document);
