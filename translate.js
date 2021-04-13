@@ -1,5 +1,4 @@
 "use strict";
-console.log("translate.js")
 
 let ELEMENT_NODE = 1
 let TEXT_NODE = 3
@@ -102,6 +101,5 @@ function translate_webpage(src_lang, tgt_lang) {
 }
 
 chrome.storage.local.get(["src_lang", "tgt_lang"], function (results) {
-    console.log("Translating webpage")
     translate_webpage(results.src_lang, results.tgt_lang)
 });
