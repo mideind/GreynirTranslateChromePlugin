@@ -7,8 +7,12 @@ Implemented:
 - Rough parsing of the DOM to gather all text elements.
 - Batching of sentences to be translated.
 - Requests are chained.
+- Chrome plugin packaging.
+- Configuration on translation direction.
 
 Not implemented:
 - Parsing of DOM sensitive to inline and block elements. This needs to be done in order to reduce splitting of sentences on inline elements.
-- Chrome plugin packaging.
-- Configuration on translation direction.
+- A banner displayed on top of site which displays translation progress and lets the user know that the site is translated.
+
+## How to run
+See directions at https://developer.chrome.com/docs/extensions/mv3/getstarted/
