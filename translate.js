@@ -1,8 +1,10 @@
 "use strict";
 
-const ELEMENT_NODE = 1
-const TEXT_NODE = 3
-const DOCUMENT_NODE = 9
+let ELEMENT_NODE = 1
+let TEXT_NODE = 3
+let DOCUMENT_NODE = 9
+
+let translate_url = "https://api.greynir.is/translate/"
 
 function isExcluded(elm) {
     if (elm.tagName == "STYLE") {
@@ -57,13 +59,14 @@ function get_text_elements(elm) {
 }
 
 async function translate(texts, src_lang = "is", tgt_lang = "en") {
-    const response = await fetch("https://velthyding.mideind.is/translate/", {
+    const response = await fetch(translate_url, {
         headers: {
-            "accept": "*/*",
+            "accept": "application/json",
             "content-type": "application/json; utf-8",
+            "X-API-Key": ""
         },
         body: JSON.stringify({ "model": "fairseq-dev", "contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
-        mode: "no-cors",
+        mode: "cors",
         method: "POST",
     })
     const data = await response.json()
@@ -76,24 +79,27 @@ function apply_translation(translation, element) {
 }
 
 
-async function translate_elements(elms, batch_size = 6, max_batches = 2) {
-    let counter = 0
-    while (elms.length && counter < max_batches) {
+async function translate_elements(elms, src_lang, tgt_lang, batch_size = 6) {
+    while (elms.length) {
         let batch = elms.splice(0, batch_size)
         try {
-            let translated = await translate(batch.map(elm => elm.nodeValue))
+            let translated = await translate(batch.map(elm => elm.nodeValue), src_lang, tgt_lang)
             translated.forEach((translation, idx) => apply_translation(translation, batch[idx]))
         } catch (e) {
             console.error(e)
         }
-        counter += 1
     }
 }
 
-// The max_batches is set for prototyping
-let max_batches = 2
-let batch_size = 6
-let text_elements = get_text_elements(document);
-translate_elements(text_elements, batch_size, max_batches)
-    .then(() => console.log("Done translating."))
-    .catch(reason => console.error("Unable to finish translation:", reason.toString()))
+function translate_webpage(src_lang, tgt_lang) {
+    // The max_batches is set for prototyping
+    let batch_size = 6
+    let text_elements = get_text_elements(document);
+    translate_elements(text_elements, src_lang, tgt_lang, batch_size)
+        .then(() => console.log("Done translating."))
+        .catch(reason => console.error("Unable to finish translation:", reason.toString()))
+}
+
+chrome.storage.local.get(["src_lang", "tgt_lang"], function (results) {
+    translate_webpage(results.src_lang, results.tgt_lang)
+});
