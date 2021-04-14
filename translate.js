@@ -72,7 +72,14 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
 }
 
 function apply_translation(translation, element) {
-    element.nodeValue = translation
+    var regex = /^(\s*)(.*?)(\s*)$/s; // dot should match newlines.
+    match = element.nodeValue.match(regex)
+    if (match != null) {
+        // We try to preserve the whitespace
+        element.nodeValue = `${match[1]}${translation}${match[3]}`
+    } else {
+        element.nodeValue = translation
+    }
     // TODO: Mark as translated.
 }
 
