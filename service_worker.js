@@ -20,22 +20,25 @@ chrome.runtime.onInstalled.addListener(function () {
     });
 });
 
-function store_and_translate(src_lang, tgt_lang, tab) {
-    chrome.storage.local.set({ "src_lang": src_lang, "tgt_lang": tgt_lang }, function () {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ["./translate.js"],
-        });
-        console.log("Started translation script")
-    });
-    console.log("Stored language directions")
+async function store_values(src_lang, tgt_lang) {
+    return chrome.storage.local.set({ "src_lang": src_lang, "tgt_lang": tgt_lang })
 }
 
+function translate(tab) {
+    chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["./translate.js"],
+    });
+}
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "ToIcelandicContextMenu") {
-        store_and_translate("en", "is", tab)
+        store_values("en", "is").then(
+            translate(tab)
+        )
     }
     if (info.menuItemId == "ToEnglishContextMenu") {
-        store_and_translate("is", "en", tab)
+        store_values("is", "en").then(
+            translate(tab)
+        )
     }
 });

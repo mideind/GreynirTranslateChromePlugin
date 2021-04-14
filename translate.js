@@ -1,10 +1,8 @@
-"use strict";
+var ELEMENT_NODE = 1
+var TEXT_NODE = 3
+var DOCUMENT_NODE = 9
 
-let ELEMENT_NODE = 1
-let TEXT_NODE = 3
-let DOCUMENT_NODE = 9
-
-let translate_url = "https://api.greynir.is/translate/"
+var translate_url = "https://velthyding.is/translate/"
 
 function isExcluded(elm) {
     if (elm.tagName == "STYLE") {
@@ -63,7 +61,7 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
         headers: {
             "accept": "application/json",
             "content-type": "application/json; utf-8",
-            "X-API-Key": ""
+            // No API-Key is set. We add it on the backend.
         },
         body: JSON.stringify({ "model": "fairseq-dev", "contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
         mode: "cors",
@@ -74,7 +72,19 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
 }
 
 function apply_translation(translation, element) {
-    element.nodeValue = translation
+    // We want to match the whitespace present in the original element to maintain the formatting.
+    // The first group matches the whitespace in the beginning.
+    // The second group matches the text to be translated, including newlines (s-flag)
+    // The third group is like the first group.
+    // This regex covers multiple lines (newlines) so only one match is possible.
+    var regex = /^(\s*)(.*?)(\s*)$/s;
+    match = element.nodeValue.match(regex)
+    if (match != null) {
+        // We try to preserve the whitespace
+        element.nodeValue = `${match[1]}${translation}${match[3]}`
+    } else {
+        element.nodeValue = translation
+    }
     // TODO: Mark as translated.
 }
 
@@ -86,6 +96,7 @@ async function translate_elements(elms, src_lang, tgt_lang, batch_size = 6) {
             let translated = await translate(batch.map(elm => elm.nodeValue), src_lang, tgt_lang)
             translated.forEach((translation, idx) => apply_translation(translation, batch[idx]))
         } catch (e) {
+            // TODO: Add handling of 401 (missing api-key)
             console.error(e)
         }
     }
