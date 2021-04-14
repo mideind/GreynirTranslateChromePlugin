@@ -72,7 +72,12 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
 }
 
 function apply_translation(translation, element) {
-    var regex = /^(\s*)(.*?)(\s*)$/s; // dot should match newlines.
+    // We want to match the whitespace present in the original element to maintain the formatting.
+    // The first group matches the whitespace in the beginning.
+    // The second group matches the text to be translated, including newlines (s-flag)
+    // The third group is like the first group.
+    // This regex covers multiple lines (newlines) so only one match is possible.
+    var regex = /^(\s*)(.*?)(\s*)$/s;
     match = element.nodeValue.match(regex)
     if (match != null) {
         // We try to preserve the whitespace
