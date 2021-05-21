@@ -16,3 +16,8 @@ Not implemented:
 
 ## How to run
 See directions at https://developer.chrome.com/docs/extensions/mv3/getstarted/
+
+## Bundling and loading to Chrome Store
+Bundle the package with `bundle.sh` and upload the zip file to the Chrome Web Store via the Developer Dashboard.
+
+You must have a chrome web store developer account. haukurpj@mideind.is is a registered account.
