@@ -1,7 +1,7 @@
 {
-    "name": "Greynir Translation",
-    "description": "Translate websites between English and Icelandic using api.greynir.is/translate",
-    "version": "0.9",
+    "name": "Greynir Translate",
+    "description": "Translate websites between English and Icelandic using velthyding.mideind.is",
+    "version": "1.0",
     "manifest_version": 3,
     "background": {
         "service_worker": "service_worker.js"
