@@ -4,8 +4,8 @@ var DOCUMENT_NODE = 9
 
 var translate_url = "https://velthyding.is/translate/"
 
-let total_elements = 0;
-let translated_elements = 0;
+var total_elements = 0;
+var translated_elements = 0;
 
 function isExcluded(elm) {
     if (elm.tagName == "STYLE") {
@@ -135,6 +135,14 @@ function create_translation_banner() {
     container.style.borderBottom = "0rem";
     container.style.borderRight = "0rem";
     container.style.borderStyle = "solid";
+    container.onclick = function () {
+        if (container.style.display === "none") {
+            container.style.display = "block";
+        } else {
+            container.style.display = "none";
+        }
+
+    };
 
     var image = document.createElement("img")
     image.setAttribute("src", "https://velthyding.mideind.is/static/media/velthyding_hor.44aeae4e.png")

@@ -9,10 +9,10 @@ Implemented:
 - Requests are chained.
 - Chrome plugin packaging.
 - Configuration on translation direction.
+- A simple translation progress bar with a logo.
 
 Not implemented:
 - Parsing of DOM sensitive to inline and block elements. This needs to be done in order to reduce splitting of sentences on inline elements.
-- A banner displayed on top of site which displays translation progress and lets the user know that the site is translated.
 
 ## How to run
 See directions at https://developer.chrome.com/docs/extensions/mv3/getstarted/
