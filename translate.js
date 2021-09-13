@@ -4,6 +4,9 @@ var DOCUMENT_NODE = 9
 
 var translate_url = "https://velthyding.is/translate/"
 
+var total_elements = 0;
+var translated_elements = 0;
+
 function isExcluded(elm) {
     if (elm.tagName == "STYLE") {
         return true;
@@ -63,7 +66,8 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
             "content-type": "application/json; utf-8",
             // No API-Key is set. We add it on the backend.
         },
-        body: JSON.stringify({ "model": "fairseq-dev", "contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
+        // No model specified. We use the default model.
+        body: JSON.stringify({"contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
         mode: "cors",
         method: "POST",
     })
@@ -88,8 +92,16 @@ function apply_translation(translation, element) {
     // TODO: Mark as translated.
 }
 
+function update_translation_progress() {
+    var banner = document.getElementById("translation-counter");
+    if (banner != null) {
+        banner.innerText = `Translated: ${translated_elements}/${total_elements}`
+    }
+}
 
 async function translate_elements(elms, src_lang, tgt_lang, batch_size = 6) {
+    update = setInterval(update_translation_progress, 1000);
+    total_elements = elms.length
     while (elms.length) {
         let batch = elms.splice(0, batch_size)
         try {
@@ -99,13 +111,61 @@ async function translate_elements(elms, src_lang, tgt_lang, batch_size = 6) {
             // TODO: Add handling of 401 (missing api-key)
             console.error(e)
         }
+        translated_elements += batch.length;
     }
+    update_translation_progress();
+    clearInterval(update);
+}
+
+function create_translation_banner() {
+    var container = document.createElement("div");
+    container.id = "translation-banner"
+    container.style.zIndex = "5001";
+    container.style.position = "fixed";
+    container.style.bottom = "0";
+    container.style.right = "0";
+    container.style.width = "20rem";
+    container.style.lineHeight = "1.0rem";
+    container.style.padding = "1.0rem";
+    container.style.backgroundColor = "white";
+    container.style.color = "black";
+    container.style.borderTopLeftRadius = "0.3rem";
+    container.style.borderColor = "black";
+    container.style.borderLeft = "0.3rem";
+    container.style.borderTop = "0.3rem";
+    container.style.borderBottom = "0rem";
+    container.style.borderRight = "0rem";
+    container.style.borderStyle = "solid";
+    container.onclick = function () {
+        if (container.style.display === "none") {
+            container.style.display = "block";
+        } else {
+            container.style.display = "none";
+        }
+
+    };
+
+    var image = document.createElement("img")
+    image.setAttribute("src", "https://velthyding.mideind.is/static/media/velthyding_hor.44aeae4e.png")
+    image.style.width = "20%"
+    image.style.height = "auto"
+    image.style.float = "left"
+    container.appendChild(image)
+
+    var translation_text = document.createElement("div")
+    image.style.float = "right"
+    translation_text.id = "translation-counter"
+    container.appendChild(translation_text)
+
+    document.body.appendChild(container);
 }
 
 function translate_webpage(src_lang, tgt_lang) {
     // The max_batches is set for prototyping
+
     let batch_size = 6
     let text_elements = get_text_elements(document);
+    create_translation_banner();
     translate_elements(text_elements, src_lang, tgt_lang, batch_size)
         .then(() => console.log("Done translating."))
         .catch(reason => console.error("Unable to finish translation:", reason.toString()))
