@@ -66,7 +66,8 @@ async function translate(texts, src_lang = "is", tgt_lang = "en") {
             "content-type": "application/json; utf-8",
             // No API-Key is set. We add it on the backend.
         },
-        body: JSON.stringify({ "model": "fairseq-dev", "contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
+        // No model specified. We use the default model.
+        body: JSON.stringify({"contents": texts, "sourceLanguageCode": src_lang, "targetLanguageCode": tgt_lang }),
         mode: "cors",
         method: "POST",
     })
